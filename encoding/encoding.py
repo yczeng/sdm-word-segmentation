@@ -15,10 +15,12 @@ def evalUtterance(utterance, languageVector=None):
 		
 	# encode trigrams into the languageVector
 	for i in range(2, n):
+		# print(i, "time!")
 		firstLetter = utterance[i-2]
 		secondLetter = utterance[i-1]
 		thirdLetter = utterance[i]
 
+		# print(firstLetter, secondLetter, thirdLetter)
 		first = np.concatenate([phonemes[firstLetter][2:], phonemes[firstLetter][0:2]])
 		second = np.concatenate([phonemes[secondLetter][1:], phonemes[secondLetter][0:1]])
 		third = phonemes[thirdLetter]
@@ -41,27 +43,27 @@ def printNext(word, phonemes, languageVector):
 
 	comparePhonemes = phonemes.copy()
 
-	for i in range(n):
-		letterRotated = np.concatenate([phonemes[word[i]][i:], phonemes[word[i]][0:i]])
+	first = np.concatenate([phonemes[word[0]][2:], phonemes[word[0]][0:2]])
+	second = np.concatenate([phonemes[word[1]][1:], phonemes[word[1]][0:1]])
 
-		if (Q == None):
-			Q = letterRotated
-		else:
-			Q *= letterRotated
+	Q = first * second
+
+	# for i in range(n):
+		# letterRotated = np.concatenate([phonemes[word[i]][i + 1:], phonemes[word[i]][0:i + 1]])
+
+		# if (Q == None):
+		# 	Q = letterRotated
+		# else:
+		# 	Q *= letterRotated
 
 	for phoneme in phonemes:
-		try:
-			comparePhonemes[phoneme] = np.dot(phonemes[phoneme], languageVector * Q)
-		except:
-			print(languageVector)
-			print(Q)
+		comparePhonemes[phoneme] = np.dot(phonemes[phoneme], languageVector * Q)
 
 	# find highest 3 letters
-
 	letterResults = []
 	for i in range(3):
 		letter = max(comparePhonemes, key=comparePhonemes.get)
-		print("THE LETTER IS", letter)
+		# print("THE LETTER IS", letter)
 		comparePhonemes.pop(letter)
 		letterResults.append(letter)
 
@@ -72,7 +74,7 @@ if __name__ == "__main__":
 	# print(phonemes)
 	languageVector = evalUtterance("yu want tu si D6 bUk")
 	print("language vector is", languageVector)
-	print(printNext("w", phonemes, languageVector))
+	print(printNext("wa", phonemes, languageVector))
 
 	# with open('data/Bernstein-Ratner87', "r") as text:
 	# 	with open('results/result.txt','w') as result:
