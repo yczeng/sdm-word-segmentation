@@ -5,12 +5,13 @@
 import numpy as np
 
 def createSeedVector():
-	phonemes = {" ": 1, "#": 1, "%": 1, "&": 1, "(": 1, ")": 1, "*": 1, "3": 1, "6": 1, "7": 1, "9": 1, "A": 1, "D": 1, "E": 1, "G": 1, "I": 1, "L": 1, "M": 1, "N": 1, "O": 1, "Q": 1, "R": 1, "S": 1, "T": 1, "U": 1, "W": 1, "Z": 1, "a": 1, "b": 1, "c": 1, "d": 1, "e": 1, "f": 1, "g": 1, "h": 1, "i": 1, "k": 1, "l": 1, "m": 1, "n": 1, "o": 1, "p": 1, "r": 1, "s": 1, "t": 1, "u": 1, "v": 1, "w": 1, "y": 1, "z": 1, "~": 1}
-	for key in phonemes:
+	phonemeList = [" ", "#", "%", "&", "(", ")", "*", "3", "6", "7", "9", "A", "D", "E", "G", "I", "L", "M", "N", "O", "Q", "R", "S", "T", "U", "W", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "v", "w", "y", "z", "~"]
+	phonemes = {}
+	for key in phonemeList:
 		phonemes[key] = np.random.choice([-1, 1], size=10000)
 	return phonemes
 
-def evalUtterance(utterance, languageVector=None):
+def evalUtterance(utterance, languageVector):
 	n = len(utterance)
 		
 	# encode trigrams into the languageVector
@@ -27,10 +28,7 @@ def evalUtterance(utterance, languageVector=None):
 
 		multiplyResult = np.multiply( np.multiply(first, second), third)
 
-		if languageVector == None:
-			languageVector = multiplyResult
-		else:
-			languageVector += multiplyResult
+		languageVector += multiplyResult
 
 	return languageVector
 
@@ -71,19 +69,18 @@ def printNext(word, phonemes, languageVector):
 
 if __name__ == "__main__":
 	phonemes = createSeedVector()
-	# print(phonemes)
-	languageVector = evalUtterance("yu want tu si D6 bUk")
-	print("language vector is", languageVector)
-	print(printNext("wa", phonemes, languageVector))
+	languageVector=np.zeros(10000)
+	# languageVector = evalUtterance("yu want tu si D6 bUk", languageVector)
+	# print(printNext("si", phonemes, languageVector))
 
-	# with open('data/Bernstein-Ratner87', "r") as text:
-	# 	with open('results/result.txt','w') as result:
+	with open('../data/Bernstein-Ratner87', "r") as text:
+		for count, line in enumerate(text):
+			# removes spaces and new line
+			# processedLine = line.replace('\n', '').replace(' ', '')
 
-	# 		for count, line in enumerate(text):
-	# 			processedLine = line.replace('\n', '').replace(' ', '')
+			processedLine = line.replace('\n', '')
 
-	# 			segmentedWord = evalUtterance(processedLine)
-	# 			print(segmentedWord)
-	# 			result.write(segmentedWord + "\n")
+			languageVector = evalUtterance(processedLine, languageVector)
 
-	# 			exit()
+	print(printNext("It", phonemes, languageVector))
+	print(printNext("an", phonemes, languageVector))
