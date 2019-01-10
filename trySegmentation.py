@@ -13,7 +13,37 @@ def createSeedVector():
 
 def evalUtterance(utterance, languageVector):
 	n = len(utterance)
-		
+	
+	storedWord = ""
+	spaceIndexes = []
+	# try to predict next letters
+	for i in range(2, n):
+		try:
+			predictedLetter = printNext(utterance[i-2: i], phonemes, languageVector)[0]
+		except:
+			predictedLetter = None
+		# print("WORD", utterance[i-2: i])
+		# print("PREDICTION", predictedLetter)
+
+		if (predictedLetter == utterance[i]):
+			storedWord += predictedLetter
+		else:
+			if len(storedWord) != 0:
+				# print("INSERT SPACE NOW!")
+				# print("stored word", storedWord, "\n")
+				spaceIndexes.append(i)
+				storedWord = ""
+			else:
+				storedWord = ""
+
+	# print(spaceIndexes)
+	for count, i in enumerate(spaceIndexes):
+		utterance = utterance[0:i + count] + " " + utterance[i + count:]
+		# print("ADDED SPACE:", utterance)
+
+	# print("NEW UTTERANCE IS", utterance)
+	n = len(utterance)
+
 	# encode trigrams into the languageVector
 	for i in range(2, n):
 		# print(i, "time!")
@@ -30,7 +60,7 @@ def evalUtterance(utterance, languageVector):
 
 		languageVector += multiplyResult
 
-	return languageVector
+	return languageVector, utterance
 
 def printNext(word, phonemes, languageVector):
 	n = len(word)
@@ -59,28 +89,47 @@ def printNext(word, phonemes, languageVector):
 
 	# find highest 3 letters
 	letterResults = []
-	for i in range(3):
+	for i in range(1):
 		letter = max(comparePhonemes, key=comparePhonemes.get)
+		# print(letter, comparePhonemes[letter])
+		# if comparePhonemes[letter] > 9000:
+			# print(word, letter)
 		# print("THE LETTER IS", letter)
-		comparePhonemes.pop(letter)
-		letterResults.append(letter)
 
+		if (comparePhonemes[letter]) != 0:
+			if comparePhonemes[letter] > 2000:
+				letterResults.append(letter)
+		comparePhonemes.pop(letter)
+
+	# print(letterResults)
 	return letterResults
 
 if __name__ == "__main__":
 	phonemes = createSeedVector()
 	languageVector=np.zeros(10000)
 	# languageVector = evalUtterance("yu want tu si D6 bUk", languageVector)
-	# print(printNext("si", phonemes, languageVector))
+	# print(printNext("wa", phonemes, languageVector))
 
-	with open('../data/Bernstein-Ratner87', "r") as text:
-		for count, line in enumerate(text):
-			# removes spaces and new line
-			# processedLine = line.replace('\n', '').replace(' ', '')
+	# with open('../data/Bernstein-Ratner87', "r") as text:
+	# 	for count, line in enumerate(text):
+	# 		# removes spaces and new line
+	# 		# processedLine = line.replace('\n', '').replace(' ', '')
 
-			processedLine = line.replace('\n', '')
+	# 		processedLine = line.replace('\n', '')
 
-			languageVector = evalUtterance(processedLine, languageVector)
+	# 		languageVector = evalUtterance(processedLine, languageVector)
 
-	print(printNext("It", phonemes, languageVector))
-	print(printNext("an", phonemes, languageVector))
+	# print(printNext("It", phonemes, languageVector))
+	# print(printNext("an", phonemes, languageVector))
+
+	with open('data/Bernstein-Ratner87', "r") as text:
+		with open('results/result.txt','w') as result:
+			for count, line in enumerate(text):
+				processedLine = line.replace('\n', '').replace(' ', '')
+
+				languageVector, segmentedUtterance = evalUtterance(processedLine, languageVector)
+				print(segmentedUtterance)
+				result.write(segmentedUtterance + "\n")
+
+		# print(printNext("uw", phonemes, languageVector))
+
